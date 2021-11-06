@@ -16,3 +16,13 @@ body {
   max-width: 95%;
   margin: 0 auto;
 }
+
+.card {
+  border: 3px solid transparent;
+  border-radius: 25px;
+}
+
+.card.done {
+  border: 3px solid #04b1cf;
+  border-radius: 25px;
+}

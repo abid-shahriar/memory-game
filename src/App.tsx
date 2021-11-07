@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Card } from './components';
+import Confetti from 'react-confetti';
 
 const data = [
   {
@@ -22,12 +23,17 @@ const data = [
   }
 ];
 
+let interval: any;
+
 export default function App() {
   const [cards, setCards] = useState<{ id: number; img: string }[] | undefined>(undefined);
   const [firstFlip, setFirstFlip] = useState<any>('');
-  const [secondFlip, setSecondFlip] = useState<any>('');
+  const [timer, setTimer] = useState<number>(6);
+  const [flipCount, setFlipCount] = useState<number>(0);
+  const [showConfetti, setShowConfetti] = useState<boolean>(false);
 
   function shuffleCards() {
+    // setTimer(6);
     const newArrOfCards = [...data, ...data].map((item) => ({ ...item, id: Math.random() }));
 
     const shuffledCards = newArrOfCards.sort(() => Math.random() - 0.5);
@@ -39,6 +45,19 @@ export default function App() {
     });
 
     setCards(shuffledCards);
+
+    interval = setInterval(() => {
+      setTimer((prevState) => {
+        if (prevState > 0) {
+          return prevState - 1;
+        }
+        return 0;
+      });
+    }, 1000);
+
+    setTimeout(() => {
+      clearInterval(interval);
+    }, 6000);
   }
 
   function showHideAllCards(showOrHide: string) {
@@ -59,26 +78,45 @@ export default function App() {
 
     setTimeout(() => {
       showHideAllCards('hide');
-    }, 5000);
+    }, 6000);
   }, [cards]);
 
-  return (
-    <div>
-      <div className='grid grid-cols-4 gap-4 max-w-[800px] mx-auto'>
-        {cards?.map((card, idx: number) => (
-          <Card
-            key={card.id}
-            img={`/svgs/${card.img}`}
-            setFirstFlip={setFirstFlip}
-            setSecondFlip={setSecondFlip}
-            firstFlip={firstFlip}
-            secondFlip={secondFlip}
-          />
-        ))}
+  useEffect(() => {
+    const allCards: any = document.querySelectorAll('.card');
 
-        <button className='text-yellow-50 text-2xl uppercase px-1 py-1 border-2 rounded-lg' onClick={shuffleCards}>
-          reset
-        </button>
+    if (allCards.length) {
+      const allDone = [...allCards].every((card: any) => card.classList.contains('done'));
+
+      if (allDone) {
+        setShowConfetti(true);
+
+        setTimeout(() => {
+          setShowConfetti(false);
+        }, 4000);
+      }
+    }
+  }, [flipCount]);
+
+  return (
+    <div className='max-w-[800px] mx-auto min-h-screen flex flex-col items-center justify-center'>
+      {showConfetti ? <Confetti width={window.innerWidth} height={window.innerHeight} numberOfPieces={200} /> : null}
+
+      <h1 className='text-white text-2xl font-semibold mb-5 text-center sm:text-4xl'>Simple Memory Game</h1>
+      <button
+        className='text-yellow-50 text-xl sm:text-2xl px-4 py-1 bg-indigo-600 rounded-lg hover:bg-indigo-700 cursor-pointer transition-all mb-4'
+        onClick={() => {
+          setTimer(6);
+          shuffleCards();
+        }}
+      >
+        New Game
+      </button>
+
+      <div className='text-white text-xl mb-5'>{timer ? <p>game starts in {timer}s</p> : null}</div>
+      <div className='grid grid-cols-4 gap-4 mx-auto'>
+        {cards?.map((card, idx: number) => (
+          <Card key={card.id} img={`/svgs/${card.img}`} setFirstFlip={setFirstFlip} firstFlip={firstFlip} setFlipCount={setFlipCount} />
+        ))}
       </div>
     </div>
   );

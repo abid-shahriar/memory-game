@@ -1,16 +1,15 @@
 interface CardProps {
   img: string;
   setFirstFlip: Function;
-  setSecondFlip: Function;
   firstFlip: any;
-  secondFlip: any;
+  setFlipCount: Function;
 }
 
-export default function Card({ img, setFirstFlip, setSecondFlip, firstFlip, secondFlip }: CardProps) {
-  let previousElement: any = '';
-
+export default function Card({ img, setFirstFlip, firstFlip, setFlipCount }: CardProps) {
   function reveal(e: any) {
     if (e.target.parentElement.classList.contains('done')) return;
+
+    setFlipCount((flipCount: number) => flipCount + 1);
 
     if (!firstFlip) {
       setFirstFlip(e.target.previousElementSibling);
@@ -37,11 +36,13 @@ export default function Card({ img, setFirstFlip, setSecondFlip, firstFlip, seco
       setFirstFlip('');
 
       document.body.style.pointerEvents = 'all';
-    }, 1500);
+    }, 1000);
   }
 
   function hide(e: any) {
     if (e.target.parentElement.classList.contains('done')) return;
+
+    setFlipCount((flipCount: number) => flipCount + 1);
 
     e.target.style.transform = 'rotateY(90deg)';
     setFirstFlip(undefined);
